@@ -1,0 +1,111 @@
+generator client {
+  provider        = "prisma-client-js"
+  binaryTargets   = ["native", "debian-openssl-3.0.x"]
+  previewFeatures = ["relationJoins"]
+}
+
+datasource db {
+  provider = "postgresql"
+  relationMode = "prisma"
+}
+
+
+
+
+
+model LoyaltyAccount {
+  loyaltyAccountId      String               @id @default(uuid()) @map("loyalty_account_id")
+  tenantId              String               @map("tenant_id")
+  customerId            String               @map("customer_id")
+  accountNumber         String               @unique @map("account_number")
+  tier                  TierEnum             @default(BRONZE) @map("tier")
+  totalPointsEarned     Int                  @default(0) @map("total_points_earned")
+  currentBalance        Int                  @default(0) @map("current_balance")
+  pointsRedeemed        Int                  @default(0) @map("points_redeemed")
+  tierQualifyingPoints  Int                  @default(0) @map("tier_qualifying_points")
+  joinDate              DateTime             @default(now()) @map("join_date")
+  tierDate              DateTime?            @map("tier_date")
+  expirationDate        DateTime?            @map("expiration_date")
+
+  transactions          LoyaltyTransaction[] @relation("AccountTransactions")
+
+  createdAt             DateTime             @default(now()) @map("created_at")
+  updatedAt             DateTime             @updatedAt @map("updated_at")
+
+  @@index([tenantId])
+  @@index([customerId])
+  @@index([tier])
+  @@index([joinDate(sort: Desc)])                    
+  @@index([tierDate(sort: Desc)])                    
+  @@index([tenantId, customerId])                    
+  @@index([tenantId, accountNumber])                 
+  @@unique([tenantId, customerId])                  
+  @@map("loyalty_accounts")
+}
+
+
+model LoyaltyTransaction {
+  transactionId     String               @id @default(uuid()) @map("transaction_id")
+  tenantId          String               @map("tenant_id")
+  loyaltyAccountId  String               @map("loyalty_account_id")
+  rentalId          String?              @map("rental_id")
+  type              TransactionType      @map("type")
+  category          TransactionCategory  @map("category")
+  points            Int                  @map("points")
+  description       String?              @map("description")
+  transactionDate   DateTime             @default(now()) @map("transaction_date")
+  expirationDate    DateTime?            @map("expiration_date")
+  batchId           String?              @map("batch_id")
+  posted            Boolean              @default(false) @map("posted")
+
+  account           LoyaltyAccount       @relation("AccountTransactions", fields: [loyaltyAccountId], references: [loyaltyAccountId], onDelete: Cascade)
+
+  createdAt         DateTime             @default(now()) @map("created_at")
+
+  @@index([tenantId])
+  @@index([loyaltyAccountId])
+  @@index([transactionDate(sort: Desc)])            
+  @@index([posted])
+  @@index([rentalId])                                
+  @@index([loyaltyAccountId, transactionDate(sort: Desc)])  
+  @@index([tenantId, type, category, transactionDate(sort: Desc)])  
+  @@index([batchId, posted])                         
+  @@index([rentalId, type])                          
+  @@map("loyalty_transactions")
+}
+
+
+model LoyaltyTier {
+  tierId         String       @id @default(uuid()) @map("tier_id")
+  tenantId       String       @map("tenant_id")
+  tierName       TierEnum     @map("tier_name")
+  minPoints      Int          @map("min_points")
+  earnMultiplier Float        @default(1.0) @map("earn_multiplier")
+  benefits       Json?        @map("benefits")
+  createdAt      DateTime     @default(now()) @map("created_at")
+
+  @@unique([tenantId, tierName])
+  @@index([tenantId])
+  @@index([tierName])
+  @@index([tenantId, tierName, minPoints])           
+  @@map("loyalty_tiers")
+}
+enum TierEnum {
+  BRONZE
+  SILVER
+  GOLD
+  PLATINUM
+}
+
+enum TransactionType {
+  EARN
+  REDEEM
+  ADJUSTMENT
+}
+
+enum TransactionCategory {
+  NTM
+  PROMOTIONAL
+  CPC
+  REDEMPTION
+}

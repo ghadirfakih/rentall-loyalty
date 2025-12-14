@@ -1,0 +1,199 @@
+{
+	"info": {
+		"_postman_id": "rentall-loyalty-api",
+		"name": "RENTALL Loyalty API",
+		"description": "Collection for RENTALL Loyalty & Rewards Service API endpoints",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "1. Create Loyalty Account",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"customerId\": \"customer-123\",\n  \"tenantId\": \"tenant-001\"\n}"
+				},
+				"url": {
+					"raw": "{{base_url}}/loyalty/accounts",
+					"host": ["{{base_url}}"],
+					"path": ["loyalty", "accounts"]
+				},
+				"description": "Creates a new loyalty account for a customer. Auto-generates accountNumber and sets tier to BRONZE."
+			}
+		},
+		{
+			"name": "2. Get Loyalty Account",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/loyalty/accounts/customer-123?tenantId=tenant-001",
+					"host": ["{{base_url}}"],
+					"path": ["loyalty", "accounts", "customer-123"],
+					"query": [
+						{
+							"key": "tenantId",
+							"value": "tenant-001"
+						}
+					]
+				},
+				"description": "Retrieves loyalty account details and current balances for a customer."
+			}
+		},
+		{
+			"name": "3. Earn Points",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"customerId\": \"customer-123\",\n  \"tenantId\": \"tenant-001\",\n  \"rentalId\": \"rental-456\",\n  \"category\": \"NTM\",\n  \"points\": 150,\n  \"description\": \"5 days × 20 points + 250 miles × 0.2\"\n}"
+				},
+				"url": {
+					"raw": "{{base_url}}/loyalty/earn",
+					"host": ["{{base_url}}"],
+					"path": ["loyalty", "earn"]
+				},
+				"description": "Creates an EARN transaction with posted=false. Set expirationDate = transactionDate + 12 months. Requires batch-post to update account balances."
+			}
+		},
+		{
+			"name": "4. Batch Post Transactions",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"tenantId\": \"tenant-001\"\n}"
+				},
+				"url": {
+					"raw": "{{base_url}}/loyalty/batch-post",
+					"host": ["{{base_url}}"],
+					"path": ["loyalty", "batch-post"]
+				},
+				"description": "Posts all pending transactions (posted=false) to account balances. Updates currentBalance, totalPointsEarned, pointsRedeemed, and tierQualifyingPoints. Marks transactions as posted=true."
+			}
+		},
+		{
+			"name": "5. Redeem Points",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"customerId\": \"customer-123\",\n  \"tenantId\": \"tenant-001\",\n  \"points\": 100,\n  \"description\": \"Redeemed for $10 rental discount\"\n}"
+				},
+				"url": {
+					"raw": "{{base_url}}/loyalty/redeem",
+					"host": ["{{base_url}}"],
+					"path": ["loyalty", "redeem"]
+				},
+				"description": "Validates sufficient non-expired points. Redeems using FIFO (oldest points first). Creates REDEEM transaction with negative points and posted=false."
+			}
+		},
+		{
+			"name": "6. Get Transaction History",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/loyalty/transactions?customerId=customer-123&tenantId=tenant-001&page=1&limit=20",
+					"host": ["{{base_url}}"],
+					"path": ["loyalty", "transactions"],
+					"query": [
+						{
+							"key": "customerId",
+							"value": "customer-123"
+						},
+						{
+							"key": "tenantId",
+							"value": "tenant-001"
+						},
+						{
+							"key": "page",
+							"value": "1"
+						},
+						{
+							"key": "limit",
+							"value": "20"
+						}
+					]
+				},
+				"description": "Returns paginated list of transactions for a customer."
+			}
+		},
+		{
+			"name": "7. Calculate Earned Points (NTM)",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"customerId\": \"customer-123\",\n  \"tenantId\": \"tenant-001\",\n  \"rentalDuration\": 5,\n  \"milesDriven\": 250\n}"
+				},
+				"url": {
+					"raw": "{{base_url}}/loyalty/calculate",
+					"host": ["{{base_url}}"],
+					"path": ["loyalty", "calculate"]
+				},
+				"description": "Calculates NTM points using formula: (days × pointsPerDay) + (miles × pointsPerMile). Applies tier multiplier based on customer's current tier. Returns detailed calculation breakdown."
+			}
+		},
+		{
+			"name": "8. Check & Apply Tier Upgrade",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"customerId\": \"customer-123\",\n  \"tenantId\": \"tenant-001\"\n}"
+				},
+				"url": {
+					"raw": "{{base_url}}/loyalty/check-tier",
+					"host": ["{{base_url}}"],
+					"path": ["loyalty", "check-tier"]
+				},
+				"description": "Compares tierQualifyingPoints against tier thresholds. Upgrades tier if eligible and updates tierDate. Returns whether upgrade happened and new tier."
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:3000",
+			"type": "string"
+		}
+	]
+}
