@@ -2,8 +2,8 @@
 
 ## 🔗 Links
 
-- **GitHub Repository**: [https://github.com/YOUR_USERNAME/rentall-loyalty-service](https://github.com/YOUR_USERNAME/rentall-loyalty-service)
-- **Live API**: [https://your-app.railway.app](https://your-app.railway.app) (or your deployment URL)
+- **GitHub Repository**: [https://github.com/ghadirfakih/rentall-loyalty](https://github.com/ghadirfakih/rentall-loyalty)
+- **Live API**: [https://rentall-loyalty.onrender.com](https://rentall-loyalty.onrender.com)
 - **Postman Collection**: See `postman-collection.json` in the root directory
 
 ## 📦 Quick Links
@@ -125,13 +125,9 @@ This will:
 npx prisma generate
 ```
 
-5. **Seed the database (Important!):**
+5. **Populate the database (Important!):**
 
-```bash
-npx ts-node prisma/seed.ts
-```
-
-This populates the `loyalty_tiers` table with default tiers (BRONZE, SILVER, GOLD, PLATINUM) for your tenant.
+You need to ensure the `loyalty_tiers` table contains the default tiers (BRONZE, SILVER, GOLD, PLATINUM) for your tenant. This can be done manually, via a script, or by any method you prefer before running the application.
 
 ## 🏃 Running the Application
 
@@ -376,7 +372,4 @@ Base URL: `http://localhost:3000`
 }
 ```
 
-## 🔄 Typical Workflow
 
-1. **Create Account**
-   
